@@ -138,7 +138,7 @@ INTERNAL_IPS = [
     # ...
 ]
 
-AUTH_USER_MODEL = 'wallet.WalletUser'
+AUTH_USER_MODEL = 'wallet.User'
 
 REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,

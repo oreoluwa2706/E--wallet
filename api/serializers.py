@@ -2,15 +2,13 @@ from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer, UserCreatePasswordRetypeSerializer, \
     UserCreateSerializer
 
-from wallet.models import UserAccount, Transaction
+from wallet.models import Wallet, Transaction, Transaction_card
 
 
-class UserAccountSerializer(serializers.ModelSerializer):
-    user_id = serializers.IntegerField(read_only=True)
-
+class WalletTransactionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserAccount
-        fields = ['first_name', 'last_name', 'user']
+        model = Wallet
+        field = ['first_name', 'last_name']
 
 
 class TransactionSerializer(serializers.ModelSerializer):
@@ -19,11 +17,19 @@ class TransactionSerializer(serializers.ModelSerializer):
         fields = ('account', 'transaction_time', 'amount')
 
 
+"""
 class UserCreate(UserCreatePasswordRetypeSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
         fields = ['username', 'password']
 
 
-class UserCreate(UserCreateSerializer):
+class UserCreates(UserCreateSerializer):
     class Meta(BaseUserCreateSerializer.Meta):
-        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name',]
+        fields = ['id', 'username', 'email', 'password', 'first_name', 'last_name', ]
+"""
+
+
+class Transaction_cardSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Transaction_card
+        fields = ('card_number', 'cvv', 'Expiry date')

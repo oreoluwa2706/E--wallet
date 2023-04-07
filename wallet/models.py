@@ -4,40 +4,31 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class WalletUser(AbstractUser):
+class User(AbstractUser):
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length=24, unique=True)
 
 
-class UserAccount(models.Model):
+class Wallet(models.Model):
     first_name = models.CharField(max_length=255, blank=False, null=False)
     last_name = models.CharField(max_length=255, blank=False, null=False)
     unique_id = models.UUIDField(primary_key=True, default=uuid4)
-    user = models.OneToOneField(
-        to='WalletUser',
-        on_delete=models.CASCADE,
-        related_name='account'
-    )
-    balance = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        default=0.0
-    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='users')
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    transaction_card = models.ForeignKey('Transaction_card', on_delete=models.CASCADE, related_name='Transaction_card')
 
-    def deposit(self, amount):
-        self.balance += amount
-        self.save()
+    def __str__(self):
+        return f'{self.first_name} {self.last_name}'
 
-    def transfer(self, to_account, amount):
-        if amount > self.balance:
-            raise ValueError("Insufficient balance")
-        self.balance -= amount
-        to_account.balance += amount
-        self.save()
-        to_account.save()
 
-    def get_transaction_history(self):
-        return 'Transaction'.objects.filter(account=self).order_by('transaction_time')
+class Transaction_card(models.Model):
+    card_number = models.IntegerField(blank=False, null=False)
+    cvv = models.IntegerField(blank=False, null=False)
+    Expiry_date = models.DateTimeField(blank=False, null=False)
+    balance = models.DecimalField(decimal_places=2, max_digits=50, max_length=50, blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.card_number} {self.cvv} {self.Expiry_date}'
 
 
 class Transaction(models.Model):
@@ -46,51 +37,6 @@ class Transaction(models.Model):
         ('W', 'Withdrawal'),
         ('T', 'Transfer')
     ]
-    account = models.ForeignKey(
-        to='UserAccount',
-        on_delete=models.CASCADE,
-        related_name='transactions'
-
-    )
     transaction_time = models.DateTimeField(auto_now_add=True)
-    type = models.CharField(
-        max_length=1,
-        choices=TRANSACTION_CHOICES,
-    )
-    amount = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-    )
-
-    @classmethod
-    def create_deposit(cls, account, amount):
-        transaction = cls(
-            account=account,
-            type='D',
-            amount=amount
-        )
-        account.deposit(amount)
-        transaction.save()
-        return transaction
-
-    @classmethod
-    def create_withdrawal(cls, account, amount):
-        transaction = cls(
-            account=account,
-            type='W',
-            amount=amount
-        )
-        account.withdraw(amount)
-        transaction.save()
-        return transaction
-
-    @classmethod
-    def create_transfer(cls, from_account, to_account, amount):
-        transaction = cls(
-            account=from_account,
-            type='T',
-            amount=amount
-        )
-        from_account.transfer(to_account, amount)
-        transaction.save()
-        return transaction
+    type = models.CharField(max_length=1, choices=TRANSACTION_CHOICES,)
+    amount = models.DecimalField(max_digits=10, decimal_places=2,)
