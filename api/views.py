@@ -5,13 +5,16 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from wallet.models import User, Transaction, Wallet, Transaction_card
+from wallet.models import User, Transaction, Wallet, Transaction_card, Account, Beneficiary
+from .pagination import DefaultPageNumberPagination
 from .permissions import IsAdminOrReadOnly
-from .serializers import TransactionSerializer, WalletTransactionSerializer, Transaction_cardSerializer
+from .serializers import TransactionSerializer, WalletTransactionSerializer, Transaction_cardSerializer, \
+    AccountSerializer, BeneficiarySerializer
 
 
 class TransactionViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
+    pagination_class = DefaultPageNumberPagination
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
 
@@ -22,10 +25,22 @@ class WalletTransactionViewSet(ModelViewSet):
     serializer_class = WalletTransactionSerializer
 
 
+class AccountViewSet(ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Account.objects.all()
+    serializer_class = AccountSerializer
+
+
 class TransactionCardViewSet(ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
     queryset = Transaction_card.objects.all()
     serializer_class = Transaction_cardSerializer
+
+
+class BeneficiaryViewSet(ModelViewSet):
+    permission_classes = [IsAdminOrReadOnly]
+    queryset = Beneficiary.objects.all()
+    serializer_class = BeneficiarySerializer
 
 
 @api_view()
